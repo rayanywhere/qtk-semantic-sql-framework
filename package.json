@@ -1,0 +1,33 @@
+{
+  "name": "@qtk/semantic-sql-framework",
+  "version": "1.0.0",
+  "description": "a semantic sql framework",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rayanywhere/qtk-semantic-sql-framework.git"
+  },
+  "keywords": [
+    "semantic",
+    "sql"
+  ],
+  "author": "ray",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rayanywhere/qtk-semantic-sql-framework/issues"
+  },
+  "homepage": "https://github.com/rayanywhere/qtk-semantic-sql-framework#readme",
+  "dependencies": {
+    "ajv": "^5.5.2",
+    "fs-extra": "^5.0.0",
+    "klaw-sync": "^3.0.2",
+    "mysql": "^2.15.0",
+    "opts": "^1.2.6"
+  }
+}
