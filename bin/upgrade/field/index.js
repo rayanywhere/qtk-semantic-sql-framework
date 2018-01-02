@@ -45,7 +45,7 @@ opts.parse([
     {
         short: 't',
         long: 'type',
-        description: 'integer|string',
+        description: 'integer|string|boolean',
         value: true,
         required: false
     },
@@ -59,7 +59,7 @@ opts.parse([
     {
         short: 'l',
         long: 'length',
-        description: 'when type is string, length is needed',
+        description: 'be required while type is string',
         value: true,
         required: false
     }
@@ -73,14 +73,14 @@ const action = opts.get('action');
 const field = opts.get('field');
 const type = opts.get('type');
 const index = opts.get('index');
-const lenght = opts.get('length');
+const length = opts.get('length');
 
 (async () => {
-    checkInputConstraint(action, type, index, lenght);
+    checkInputConstraint(action, type, index, length);
     //set config, models in retriveEnv function
     retriveEnv(path.resolve(opts.get('models-dir')), path.resolve(opts.get('config-dir')));
     let connection = await createConnection(config[models[modelName].router]);
-    let sqls = buildSqls(action, modelName, field, type, index, lenght);
+    let sqls = buildSqls(action, modelName, field, type, index, length);
     for (let sql of sqls) {
         await executeSql(connection, sql);
     }
@@ -93,24 +93,24 @@ const lenght = opts.get('length');
 
 
 
-function buildSqls(action, tableName, field, type, index, lenght) {
+function buildSqls(action, tableName, field, type, index, length) {
     let sqls = [];
     switch(action) {
         case 'add': {
-            sqls.push(`ALTER TABLE ${tableName} ADD COLUMN ${field} ${getSqlType(type, lenght)} not null`);
+            sqls.push(`ALTER TABLE \`${tableName}\` ADD COLUMN \`${field}\` ${getSqlType(type, length)} not null`);
             if (index) {
-                sqls.push(`ALTER TABLE ${tableName} ADD ${index == 'unique' ? `UNIQUE`:``} INDEX ${field}(${field})`);
+                sqls.push(`ALTER TABLE \`${tableName}\` ADD ${index === 'unique' ? 'UNIQUE' : ''} INDEX \`${field}\`(\`${field}\`)`);
             }
             break;
         }
         case 'remove': {
-            sqls.push(`ALTER TABLE ${tableName} DROP COLUMN ${field}`);
+            sqls.push(`ALTER TABLE \`${tableName}\` DROP COLUMN \`${field}\``);
             break;
         }
         case 'update': {
-            sqls.push(`ALTER TABLE ${tableName} MODIFY ${field} ${getSqlType(type, lenght)} not null`);
+            sqls.push(`ALTER TABLE \`${tableName}\` MODIFY \`${field}\` ${getSqlType(type, length)} NOT NULL`);
             if (index) {
-                sqls.push(`ALTER TABLE ${tableName} ADD ${index == 'unique' ? `UNIQUE`:``} INDEX ${field}(${field})`);
+                sqls.push(`ALTER TABLE \`${tableName}\` ADD ${index === 'unique' ? 'UNIQUE' : ''} INDEX \`${field}\`(\`${field}\`)`);
             }
             break;
         }
@@ -118,23 +118,24 @@ function buildSqls(action, tableName, field, type, index, lenght) {
     return sqls;
 }
 
-function getSqlType(type, lenght) {
+function getSqlType(type, length) {
     switch(type) {
-        case 'string': return `VARCHAR(${lenght})`;
+        case 'string': return `VARCHAR(${length})`;
         case 'integer': return `INTEGER`;
         case 'boolean':  return `BOOLEAN`;
     }
     throw new Error(`unknown type(${type})`);
 }
 
-function checkInputConstraint(action, type, index, lenght) {
-    if (action == 'add') assert(['string', 'integer', "boolean"].includes(type), `only allow [string, integer, boolean], ${type} is invalid`);
+function checkInputConstraint(action, type, index, length) {
+    if (action === 'add') assert(['string', 'integer', "boolean"].includes(type), `only allow [string, integer, boolean], ${type} is invalid`);
     if (index !== undefined) assert(['unique', 'ordinary'].includes(index), `index only allow [unique, ordinary]`);
-    if (type == 'string') {
-        assert(lenght !== undefined && parseInt(lenght) > 0, `when type is string, must assign length and length should > 0`);
+    if (type === 'string') {
+        assert(length !== undefined && parseInt(length) > 0, `when type is string, must assign length and length should > 0`);
     } else {
-        assert(lenght === undefined, `when type is integer, length is needless`);
+        assert(length === undefined, `when type is integer, length is needless`);
     }
+    if (action !== 'remove') assert(type !== undefined, `type is required while action is ${action}`);
 }
 
 function retriveEnv(modelsDir, configDir) {

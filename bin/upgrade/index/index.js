@@ -69,18 +69,18 @@ const index = opts.get('index');
         case 'add': {
             switch(index) {
                 case 'unique': {
-                    sql = `ALTER TABLE ${modelName} ADD UNIQUE INDEX ${field}(${field})`;
+                    sql = `ALTER TABLE \`${modelName}\` ADD UNIQUE INDEX \`${field}\`(\`${field}\`)`;
                     break;
                 }
                 case 'ordinary': {
-                    sql = `ALTER TABLE ${modelName} INDEX ${field}(${field})`;
+                    sql = `ALTER TABLE \`${modelName}\` ADD INDEX \`${field}\`(\`${field}\`)`;
                     break;
                 }
             }
             break;
         }
         case 'remove': {
-            sql = `ALTER TABLE ${modelName} DROP INDEX ${field}`;
+            sql = `ALTER TABLE \`${modelName}\` DROP INDEX \`${field}\``;
             break;
         }
     }
@@ -94,7 +94,7 @@ const index = opts.get('index');
 
 
 function checkInputConstraint(action, index) {
-    if (action == 'add') {
+    if (action === 'add') {
         assert(['unique', 'ordinary'].includes(index), `index only allow [unique, ordinary]`);
     } else {
         assert(index === undefined, `on remove process, index is needless`);

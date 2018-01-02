@@ -4,10 +4,16 @@
   "description": "a semantic sql framework",
   "main": "index.js",
   "directories": {
-    "example": "example"
+    "example": "example",
+    "test": "test"
   },
   "scripts": {
     "test": "mocha"
+  },
+  "bin": {
+    "sm_setup": "./bin/setup/index.js",
+    "sm_upgrade_field": "./bin/upgrade/field/index.js",
+    "sm_upgrade_index": "./bin/migrate/index/index.js"
   },
   "repository": {
     "type": "git",

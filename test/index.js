@@ -1,14 +1,15 @@
-const SmartModel = require('../');
+const SmartModel = require('../index');
 const {Insert, Select, SelectOne, Count, Update, Delete, Join, Statement, Ops} = SmartModel.Keyword;
 const assert = require('assert');
 const Mysql = require('mysql');
+const childProcess = require('child_process');
 
-SmartModel.setup(`${__dirname}/models`, `${__dirname}/config`);
+SmartModel.setup(`${__dirname}/../example/models`, `${__dirname}/../example/config`);
 
 describe('SmartModel', () => {
     describe('CURD', () => {
         it('should return without error', async () => {
-            await truncate();
+            await initDB();
             await Insert('user').data({name:'ray', id: '1001', gender: 1, isVip: true}).run();
             await Insert('user').data({name:'ray宝宝', id: '1002', gender: 0, isVip: true}).run();
             await Insert('user').data({name:'我是ray', id: '1003', gender: 0, isVip: true}).run();
@@ -61,25 +62,45 @@ describe('SmartModel', () => {
                 Statement('name', Ops.EQ, 'ray')
             ).run();
             assert(user === null, 'user should not not existed after del');
-
-            await truncate();
         });
     });
 
     describe('Tool', () => {
-        it('');
+        it('[field] should return without error', async () => {
+            //add
+            await exec(`${__dirname}/../bin/upgrade/field/index.js -a add -o user -f nickname -t string -l 30 -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+            await exec(`${__dirname}/../bin/upgrade/field/index.js -a add -o user -f order -t boolean -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+            await exec(`${__dirname}/../bin/upgrade/field/index.js -a add -o user -f createdTime -t integer -i ordinary -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+
+            //remove
+            await exec(`${__dirname}/../bin/upgrade/field/index.js -a remove -o user -f createdTime -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+
+            //update
+            await exec(`${__dirname}/../bin/upgrade/field/index.js -a update -o user -f nickname -t string -l 500 -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+
+        }).timeout(5000);
+
+        it('[index] should return without error', async () => {
+            //add
+            await exec(`${__dirname}/../bin/upgrade/index/index.js -a add -o user -f order -i ordinary -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+
+            //remove
+            await exec(`${__dirname}/../bin/upgrade/index/index.js -a remove -o user -f order -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+        }).timeout(5000);
     });
 });
 
-async function truncate() {
-    let _f = async (model) => {
-        const routerList = require(`${__dirname}/config`);
-        const router = require(`${__dirname}/models/${model}`).router;
+async function initDB() {
+    let _f = async (config) => {
+        const mysql = await Mysql.createConnection({
+            host: config.host,
+            port: config.port,
+            user: config.user,
+            password: config.password,
+        });
 
-        const mysql = await Mysql.createConnection(routerList[router]);
-        let sql = Mysql.format('truncate table ??.??', [routerList[router].database, model]);
         return await new Promise((resolve, reject) => {
-            mysql.query(sql, (error) => {
+            mysql.query(`DROP DATABASE IF EXISTS ${config.database}`, (error) => {
                 if (error) {
                     reject(error);
                     return;
@@ -88,9 +109,21 @@ async function truncate() {
             });
         });
     };
-    await Promise.all([
-        _f('order'),
-        _f('user'),
-        _f('user_statistic')
-    ]);
+    const routerList = require(`${__dirname}/../example/config`);
+
+    await Promise.all(Object.entries(routerList).map(([n, config]) => _f(config)));
+
+    await exec(`${__dirname}/../bin/setup/index.js -m ${__dirname}/../example/models/ -c ${__dirname}/../example/config/`);
+}
+
+async function exec(cmd) {
+    return new Promise((resolve, reject) => {
+        childProcess.exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                reject(error, stderr);
+                return;
+            }
+            resolve(stdout, stderr);
+        });
+    });
 }

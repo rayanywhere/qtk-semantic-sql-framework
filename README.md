@@ -1,1 +1,1 @@
-# smart-model
+# semantic-model
