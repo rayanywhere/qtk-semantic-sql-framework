@@ -1,6 +1,6 @@
 {
   "name": "@qtk/semantic-sql-framework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a semantic sql framework",
   "main": "index.js",
   "directories": {
@@ -13,7 +13,7 @@
   "bin": {
     "semantic_sql_setup": "./bin/setup/index.js",
     "semantic_sql_upgrade_field": "./bin/upgrade/field/index.js",
-    "semantic_sql_upgrade_index": "./bin/migrate/index/index.js"
+    "semantic_sql_upgrade_index": "./bin/upgrade/index/index.js"
   },
   "repository": {
     "type": "git",
