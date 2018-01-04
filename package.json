@@ -11,9 +11,9 @@
     "test": "mocha"
   },
   "bin": {
-    "sm_setup": "./bin/setup/index.js",
-    "sm_upgrade_field": "./bin/upgrade/field/index.js",
-    "sm_upgrade_index": "./bin/migrate/index/index.js"
+    "semantic_sql_setup": "./bin/setup/index.js",
+    "semantic_sql_upgrade_field": "./bin/upgrade/field/index.js",
+    "semantic_sql_upgrade_index": "./bin/migrate/index/index.js"
   },
   "repository": {
     "type": "git",
