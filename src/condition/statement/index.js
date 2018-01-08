@@ -5,7 +5,7 @@ const sqlstring = require('sqlstring');
 class Statement extends Condition {
     constructor(field, op, value) {
         super();
-        assert(typeof field === 'string' && typeof op === 'string' && (typeof value === 'string' || typeof value === 'number'), 'bad statement');
+        assert(typeof field === 'string' && typeof op === 'string' && (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'), 'bad statement');
         this._field = field;
         this._op = op;
         this._value = value;
